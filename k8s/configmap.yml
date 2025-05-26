@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: car-app-config
+  namespace: car-app
+data:
+  DB_HOST: car-app-db-do-user-21214113-0.d.db.ondigitalocean.com
+  DB_PORT: "25060"
+  DB_NAME: defaultdb
+  SSL_MODE: require

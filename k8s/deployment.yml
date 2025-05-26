@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: car-app-backend
+  namespace: car-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: car-app-backend
+  template:
+    metadata:
+      labels:
+        app: car-app-backend
+    spec:
+      containers:
+        - name: car-app-backend
+          image: samiko123/car-backend:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://$(DB_HOST):$(DB_PORT)/$(DB_NAME)?sslmode=$(SSL_MODE)
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: car-app-secrets
+                  key: DB_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: car-app-secrets
+                  key: DB_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: car-app-secrets
+                  key: JWT_SECRET
+          envFrom:
+            - configMapRef:
+                name: car-app-config
