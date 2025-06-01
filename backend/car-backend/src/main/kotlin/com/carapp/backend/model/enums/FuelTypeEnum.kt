@@ -1,16 +1,16 @@
 package com.carapp.backend.model.enums
 
 enum class FuelType {
-    `diesel fuel`,
+    diesel_fuel,
     electric,
-    `flex-fuel (premium unleaded recommended/E85)`,
-    `flex-fuel (premium unleaded required/E85)`,
-    `flex-fuel (unleaded/E85)`,
-    `flex-fuel (unleaded/natural gas)`,
+    flex_fuel_premium_unleaded_recommended_E85,
+    flex_fuel_premium_unleaded_required_E85,
+    flex_fuel_unleaded_E85,
+    flex_fuel_unleaded_natural_gas,
     hydrogen,
-    `midgrade unleaded (recommended)`,
-    `natural gas`,
-    `premium unleaded (recommended)`,
-    `premium unleaded (required)`,
-    `regular unleaded`
+    midgrade_unleaded_recommended,
+    natural_gas,
+    premium_unleaded_recommended,
+    premium_unleaded_required,
+    regular_unleaded
 }

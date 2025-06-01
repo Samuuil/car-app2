@@ -34,6 +34,11 @@ spec:
                 secretKeyRef:
                   name: car-app-secrets
                   key: JWT_SECRET
+            - name: CARAPI_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: car-app-secrets
+                  key: CARAPI_TOKEN
           envFrom:
             - configMapRef:
                 name: car-app-config
