@@ -2,14 +2,11 @@ package com.carapp.backend.service
 
 import com.carapp.backend.model.dto.CarApiTrimDto
 import com.carapp.backend.model.entity.CarSpec
-import com.carapp.backend.model.enums.DriveType
-import com.carapp.backend.model.enums.EngineType
-import com.carapp.backend.model.enums.FuelType
-import com.carapp.backend.model.enums.TransmissionType
 import com.carapp.backend.repository.CarSpecRepository
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -22,6 +19,7 @@ import org.springframework.web.client.RestTemplate
 class CarSpecImportService(
     private val carSpecRepository: CarSpecRepository
 ) {
+    private val logger = LoggerFactory.getLogger(CarSpecImportService::class.java)
 
     @Value("\${carapi.token}")
     lateinit var apiToken: String
@@ -32,9 +30,11 @@ class CarSpecImportService(
     private val restTemplate = RestTemplate()
 
     fun importSpecs(trimIds: List<Int>) {
-        println("Starting car spec import...AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        logger.info("Starting import of ${trimIds.size} car specs")
+        
         for (id in trimIds) {
             val url = "https://carapi.app/api/trims/v2/$id"
+            logger.info("Fetching data for trim ID: $id")
 
             val headers = HttpHeaders().apply {
                 set("Authorization", "Bearer $apiToken")
@@ -46,6 +46,7 @@ class CarSpecImportService(
                     restTemplate.exchange(url, HttpMethod.GET, request, String::class.java)
 
                 response.body?.let {
+                    logger.debug("Received response for trim ID $id: $it")
                     val dto = objectMapper.readValue<CarApiTrimDto>(it)
 
                     val engine = dto.engines?.firstOrNull()
@@ -57,22 +58,30 @@ class CarSpecImportService(
                             make = dto.make,
                             model = dto.model,
                             year = dto.year,
-                            engineType = engine.engine_type?.lowercase(),
-                            driveType = driveType.description?.lowercase(),
+                            engineType = engine.engine_type,
                             fuelType = engine.fuel_type,
-                            cylinderCount = engine.cylinders?.filter { it.isDigit() }?.toIntOrNull(),
+                            cylinderCount = engine.cylinders
+                                ?.filter { it.isDigit() }
+                                ?.toIntOrNull(),
                             engineSizeLiters = engine.size?.toDoubleOrNull(),
                             horsepower = engine.horsepower_hp,
                             transmissionType = transmission.description,
+                            driveType = driveType.description
                         )
 
-
-                        carSpecRepository.save(spec)
+                        logger.info("Saving car spec for ${spec.make} ${spec.model} ${spec.year}")
+                        val savedSpec = carSpecRepository.save(spec)
+                        logger.info("Successfully saved car spec with ID: ${savedSpec.id}")
+                    } else {
+                        logger.warn("Missing required data for trim ID $id: engine=${engine != null}, transmission=${transmission != null}, driveType=${driveType != null}")
                     }
+                } ?: run {
+                    logger.warn("Empty response body received for trim ID $id")
                 }
             } catch (ex: Exception) {
-                println("Failed to import trim ID $id: ${ex.message}")
+                logger.error("Failed to import trim ID $id: ${ex.message}", ex)
             }
         }
+        logger.info("Finished importing car specs")
     }
 }
