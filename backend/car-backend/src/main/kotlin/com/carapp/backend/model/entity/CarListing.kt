@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 @Table(name = "car_listings")
 data class CarListing(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+    val id: Int = 0,
 
     @ManyToOne @JoinColumn(name = "user_id")
     val user: User,
