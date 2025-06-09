@@ -6,8 +6,7 @@ import com.carapp.backend.model.dto.RegisterRequest
 import com.carapp.backend.model.entity.User
 import com.carapp.backend.repository.UserRepository
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -21,8 +20,7 @@ import java.util.*
 @Service
 class AuthService(
     private val userRepository: UserRepository,
-    private val passwordEncoder: PasswordEncoder,
-    private val authenticationManager: AuthenticationManager
+    private val passwordEncoder: PasswordEncoder
 ) : UserDetailsService {
 
     @Value("\${jwt.secret}")
@@ -48,12 +46,14 @@ class AuthService(
     }
 
     fun login(request: LoginRequest): AuthResponse {
-        authenticationManager.authenticate(
-            UsernamePasswordAuthenticationToken(request.username, request.password)
-        )
-
+        // Manual authentication instead of using AuthenticationManager
         val user = userRepository.findByUsername(request.username)
             ?: throw UsernameNotFoundException("User not found")
+
+        // Check password manually
+        if (!passwordEncoder.matches(request.password, user.passwordHash)) {
+            throw BadCredentialsException("Invalid credentials")
+        }
 
         val token = generateToken(user)
         return AuthResponse(token = token, username = user.username)
@@ -64,7 +64,7 @@ class AuthService(
             ?: throw UsernameNotFoundException("User not found")
 
         return org.springframework.security.core.userdetails.User(
-            user.username,
+            user.id.toString(),
             user.passwordHash,
             emptyList()
         )

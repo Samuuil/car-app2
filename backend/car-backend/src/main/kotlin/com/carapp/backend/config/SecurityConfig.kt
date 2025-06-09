@@ -1,10 +1,9 @@
 package com.carapp.backend.config
 
-import com.carapp.backend.service.AuthService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -25,9 +24,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig(
-    private val authService: AuthService
-) {
+class SecurityConfig {
     @Value("\${jwt.secret}")
     private lateinit var jwtSecret: String
 
@@ -47,12 +44,8 @@ class SecurityConfig(
     }
 
     @Bean
-    fun authenticationManager(http: HttpSecurity): AuthenticationManager {
-        val authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder::class.java)
-        authenticationManagerBuilder
-            .userDetailsService(authService)
-            .passwordEncoder(passwordEncoder())
-        return authenticationManagerBuilder.build()
+    fun authenticationManager(authConfig: AuthenticationConfiguration): AuthenticationManager {
+        return authConfig.authenticationManager
     }
 
     @Bean

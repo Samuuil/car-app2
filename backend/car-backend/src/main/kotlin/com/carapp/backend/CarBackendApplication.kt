@@ -13,21 +13,20 @@ class CarBackendApplication {
 
 	@PostConstruct
 	fun init() {
-		println("🚀 === Car Backend Application Starting === 🚀")
+		println("=== Car Backend Application Starting ===")
 		println("Car Backend Application is running...ASISAUDHIUADSIUASHDIAFIAHSDBIAFIUASIBFHADDNBHFAFIUHSDIAHFIUA")
 	}
 }
 
 fun main(args: Array<String>) {
-	println("🔥 === MAIN METHOD - Starting Spring Boot Application === 🔥")
+	println("=== MAIN METHOD - Starting Spring Boot Application ===")
 
 	val context = runApplication<CarBackendApplication>(*args)
 
-	println("🏁 === Spring Boot Application Context Fully Started === 🏁")
+	println("=== Spring Boot Application Context Fully Started ===")
 
-	// Run the car spec import after application startup
 	try {
-		println("🔥 === CAR SPEC IMPORT STARTING === 🔥")
+		println("=== CAR SPEC IMPORT STARTING ===")
 
 		val carSpecImportService = context.getBean(CarSpecImportService::class.java)
 
@@ -43,12 +42,12 @@ fun main(args: Array<String>) {
 
 		println("About to import ${trimIds.size} car specs")
 
-		carSpecImportService.importSpecs(trimIds)
+//		carSpecImportService.importSpecs(trimIds)
 
-		println("🎉 === CAR SPEC IMPORT COMPLETED === 🎉")
+		println("=== CAR SPEC IMPORT COMPLETED ===")
 
 	} catch (e: Exception) {
-		println("💥 === ERROR IN CAR SPEC IMPORT: ${e.message} === 💥")
+		println("=== ERROR IN CAR SPEC IMPORT: ${e.message} ===")
 		e.printStackTrace()
 	}
 }
